@@ -12,7 +12,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    "setuptools<=26.1.1",
+    "packaging",
+    "six",
     "pyyaml",
 ]
 
@@ -26,7 +27,7 @@ test_requirements = [
 
 setup(
     name='dparse',
-    version='0.1.0',
+    version='0.2.1',
     description="A parser for Python dependency files",
     long_description=readme + '\n\n' + history,
     author="Jannis Gebauer",
