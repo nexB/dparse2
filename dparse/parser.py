@@ -15,12 +15,21 @@ try:
 except ImportError:
     from configparser import SafeConfigParser, NoOptionError
 
+# Python 2 & 3 compatible basestring
+try:  # pragma: no cover
+    basestring
+except NameError:  # pragma: no cover
+    basestring = str
+
 from .regex import URL_REGEX, HASH_REGEX
 
 from .dependencies import DependencyFile, Dependency
 from packaging.requirements import Requirement as PackagingRequirement, InvalidRequirement
 import six
 from . import filetypes
+from pipenv.vendor import toml
+from packaging.specifiers import SpecifierSet
+import json
 
 
 # this is a backport from setuptools 26.1
@@ -249,6 +258,9 @@ class RequirementsTXTParser(Parser):
                             if "\\" in next_line:
                                 continue
                             break
+                        # ignore multiline requirements if they are marked
+                        if self.is_marked_line(parseable_line):
+                            continue
 
                     hashes = []
                     if "--hash" in parseable_line:
@@ -316,6 +328,94 @@ class CondaYMLParser(Parser):
                                 self.obj.dependencies.append(req)
         except yaml.YAMLError:
             pass
+
+
+class PipfileParser(Parser):
+
+    def parse(self):
+        """
+        Parse a Pipfile (as seen in pipenv)
+        :return:
+        """
+        try:
+            data = toml.loads(self.obj.content)
+            if data:
+                for package_type in ['packages', 'dev-packages']:
+                    if package_type in data:
+                        for name, specs in data[package_type].items():
+                            # skip on VCS dependencies
+                            if not isinstance(specs, basestring):
+                                continue
+                            if specs == '*':
+                                specs = ''
+                            self.obj.dependencies.append(
+                                Dependency(
+                                    name=name, specs=SpecifierSet(specs),
+                                    dependency_type=filetypes.pipfile,
+                                    line=''.join([name, specs]),
+                                    section=package_type
+                                )
+                            )
+        except toml.TomlDecodeError:
+            pass
+
+
+class PipfileLockParser(Parser):
+
+    def parse(self):
+        """
+        Parse a Pipfile.lock (as seen in pipenv)
+        :return:
+        """
+        try:
+            data = json.loads(self.obj.content)
+            if data:
+                for package_type in ['default', 'develop']:
+                    if package_type in data:
+                        for name, meta in data[package_type].items():
+                            # skip VCS dependencies
+                            if 'version' not in meta:
+                                continue
+                            specs = meta['version']
+                            hashes = meta['hashes']
+                            self.obj.dependencies.append(
+                                Dependency(
+                                    name=name, specs=SpecifierSet(specs),
+                                    dependency_type=filetypes.pipfile_lock,
+                                    hashes=hashes,
+                                    line=''.join([name, specs]),
+                                    section=package_type
+                                )
+                            )
+        except json.JSONDecodeError:
+            pass
+
+
+class SetupCfgParser(Parser):
+    def parse(self):
+        parser = SafeConfigParser()
+        parser.readfp(StringIO(self.obj.content))
+        for section in parser.values():
+            if section.name == 'options':
+                options = 'install_requires', 'setup_requires', 'test_require'
+                for name in options:
+                    content = section.get(name)
+                    if not content:
+                        continue
+                    self._parse_content(content)
+            elif section.name == 'options.extras_require':
+                for content in section.values():
+                    self._parse_content(content)
+
+    def _parse_content(self, content):
+        for n, line in enumerate(content.splitlines()):
+            if self.is_marked_line(line):
+                continue
+            if line:
+                req = RequirementsTXTLineParser.parse(line)
+                if req:
+                    req.dependency_type = self.obj.file_type
+                    self.obj.dependencies.append(req)
 
 
 def parse(content, file_type=None, path=None, sha=None, marker=((), ()), parser=None):

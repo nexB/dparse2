@@ -11,7 +11,7 @@ class Dependency(object):
 
     """
 
-    def __init__(self, name, specs, line, source="pypi", meta={}, extras=None, line_numbers=None, index_server=None, hashes=(), dependency_type=None):
+    def __init__(self, name, specs, line, source="pypi", meta={}, extras=[], line_numbers=None, index_server=None, hashes=(), dependency_type=None, section=None):
         """
 
         :param name:
@@ -35,6 +35,7 @@ class Dependency(object):
         self.hashes = hashes
         self.dependency_type = dependency_type
         self.extras = extras
+        self.section = section
 
     def __str__(self):  # pragma: no cover
         """
@@ -62,7 +63,8 @@ class Dependency(object):
             "index_server": self.index_server,
             "hashes": self.hashes,
             "dependency_type": self.dependency_type,
-            "extras": self.extras
+            "extras": self.extras,
+            "section": self.section
         }
 
     @classmethod
@@ -122,6 +124,13 @@ class DependencyFile(object):
                     self.parser = parser_class.ToxINIParser
                 elif file_type == filetypes.conda_yml:
                     self.parser = parser_class.CondaYMLParser
+                elif file_type == filetypes.pipfile:
+                    self.parser = parser_class.PipfileParser
+                elif file_type == filetypes.pipfile_lock:
+                    self.parser = parser_class.PipfileLockParser
+                elif file_type == filetypes.setup_cfg:
+                    self.parser = parser_class.SetupCfgParser
+
             elif path is not None:
                 if path.endswith(".txt"):
                     self.parser = parser_class.RequirementsTXTParser
@@ -129,6 +138,12 @@ class DependencyFile(object):
                     self.parser = parser_class.CondaYMLParser
                 elif path.endswith(".ini"):
                     self.parser = parser_class.ToxINIParser
+                elif path.endswith("Pipfile"):
+                    self.parser = parser_class.PipfileParser
+                elif path.endswith("Pipfile.lock"):
+                    self.parser = parser_class.PipfileLockParser
+                elif path.endswith("setup.cfg"):
+                    self.parser = parser_class.SetupCfgParser
 
         if not hasattr(self, "parser"):
             raise errors.UnknownDependencyFileError
