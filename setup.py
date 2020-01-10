@@ -16,7 +16,6 @@ requirements = [
     "packaging",
     "six",
     "pyyaml",
-    "pipenv"
 ]
 
 # make pytest-runner a conditional requirement, per: https://pypi.org/project/pytest-runner/
@@ -33,11 +32,11 @@ test_requirements = [
 
 setup(
     name='dparse',
-    version='0.2.1',
+    version='0.4.1',
     description="A parser for Python dependency files",
     long_description=readme + '\n\n' + history,
     author="Jannis Gebauer",
-    author_email='ja.geb@me.com',
+    author_email='jay@pyup.io',
     url='https://github.com/jayfk/dparse',
     packages=find_packages(include=['dparse']),
     include_package_data=True,
@@ -51,14 +50,16 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     test_suite='tests',
     tests_require=test_requirements,
     setup_requires=setup_requirements,
+    extras_require={
+        'pipenv':  ["pipenv"],
+    }
 )
