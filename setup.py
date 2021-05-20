@@ -15,17 +15,16 @@ requirements = [
     "packaging",
     "pyyaml",
     "toml",
-    "six",
 ]
 
 setup(
-    name='dparse2',
-    version='0.5.0.4',
-    description="A parser for Python dependency files. Temp fork for Python 2 support.",
+    name='dparse',
+    version='0.5.2a',
+    description="A parser for Python dependency files",
     long_description=readme + '\n\n' + history,
     author="Jannis Gebauer",
-    author_email='jay@pyup.io',
-    url='https://github.com/nexB/dparse',
+    author_email='support@pyup.io',
+    url='https://github.com/pyupio/dparse',
     packages=find_packages(include=['dparse']),
     include_package_data=True,
     install_requires=requirements,
@@ -37,13 +36,13 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
+    python_requires=">=3.5",
     extras_require={
         'pipenv':  ["pipenv"],
     }
