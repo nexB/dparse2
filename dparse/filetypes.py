@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
+
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
 
 requirements_txt = "requirements.txt"
 conda_yml = "conda.yml"

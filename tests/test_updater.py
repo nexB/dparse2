@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
 
-"""Tests for `dparse.updater`"""
 
-from unittest import skipIf
 import sys
+from unittest import skipIf
 
-from dparse.parser import parse
-from dparse.updater import RequirementsTXTUpdater, CondaYMLUpdater, ToxINIUpdater, PipfileLockUpdater, PipfileUpdater
 from dparse import filetypes
+from dparse.parser import parse
+from dparse.updater import CondaYMLUpdater
+from dparse.updater import PipfileLockUpdater
+from dparse.updater import PipfileUpdater
+from dparse.updater import RequirementsTXTUpdater
+from dparse.updater import ToxINIUpdater
 
 
 def test_update_tox_ini():

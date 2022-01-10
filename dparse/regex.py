@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
+
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
+
 
 import re
 # see https://gist.github.com/dperini/729294
+
 URL_REGEX = re.compile(
     # protocol identifier
     "(?:(?:https?|ftp)://)"

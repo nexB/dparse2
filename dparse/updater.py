@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-import re
+
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
+
 import json
-# Python 2 & 3 compatible StringIO
-import tempfile
-import toml
 import os
+import re
+import tempfile
+
+import toml
 
 
 class RequirementsTXTUpdater(object):
@@ -75,6 +80,7 @@ class SetupCFGUpdater(CondaYMLUpdater):
 
 
 class PipfileUpdater(object):
+
     @classmethod
     def update(cls, content, dependency, version, spec="==", hashes=()):
         data = toml.loads(content)
@@ -99,6 +105,7 @@ class PipfileUpdater(object):
 
 
 class PipfileLockUpdater(object):
+
     @classmethod
     def update(cls, content, dependency, version, spec="==", hashes=()):
         data = json.loads(content)

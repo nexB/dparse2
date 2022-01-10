@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-"""Tests for `dparse.parser`"""
 
-from dparse.parser import parse, Parser
-from dparse import filetypes
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
+
 from packaging.specifiers import SpecifierSet
+
+from dparse.parser import parse
+from dparse.parser import Parser
+from dparse import filetypes
 
 
 def test_requirements_with_invalid_requirement():

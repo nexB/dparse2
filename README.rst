@@ -3,17 +3,13 @@ Dependency Parser
 =================
 
 
-.. image:: https://img.shields.io/pypi/v/dparse.svg
-        :target: https://pypi.python.org/pypi/dparse
+A parser for Python manifests and dependency files now at 
+https://github.com/nexB/dparse2
 
-.. image:: https://img.shields.io/travis/pyupio/dparse.svg
-        :target: https://travis-ci.org/pyupio/dparse
+Originally at https://github.com/pyupio/dparse
 
-.. image:: https://codecov.io/gh/pyupio/dparse/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/pyupio/dparse
-
-
-A parser for Python dependency files
+This is a maintained fork by some of the contributors since upstream stopped
+updating this.
 
 
 Supported Files
@@ -47,25 +43,26 @@ Supported Files
 Installation
 ************
 
-To install dparse, run:
+To install dparse2, run:
 
 .. code-block:: console
 
-    $ pip install dparse
+    $ pip install dparse2
 
 If you want to update Pipfiles, install the pipenv extra:
 
 .. code-block:: console
 
-    $ pip install dparse[pipenv]
+    $ pip install dparse2[pipenv]
 
 *****
 Usage
 *****
 
-To use dparse in a Python project::
+To use dparse2 in a Python project::
 
-    from dparse import parse, filetypes
+    from dparse2 import parse
+    from dparse2 import filetypes
 
     content = """
     South==1.0.1 --hash=sha256:abcdefghijklmno
@@ -75,8 +72,6 @@ To use dparse in a Python project::
     df = parse(content, file_type=filetypes.requirements_txt)
 
     print(df.json())
-
-
 
 
     {
@@ -124,19 +119,6 @@ To use dparse in a Python project::
       ]
     }
 
-**********
-Python 2.7
-**********
 
-This tool requires latest Python patch versions starting with version 3.5. We
-did support Python 2.7 in the past but, as for other Python 3.x minor versions,
-it reached its End-Of-Life and as such we are not able to support it anymore.
 
-We understand you might still have Python 2.7 projects running. At the same
-time, Safety itself has a commitment to encourage developers to keep their
-software up-to-date, and it would not make sense for us to work with officially
-unsupported Python versions, or even those that reached their end of life.
-
-If you still need to use Safety with Python 2.7, please use version 0.4.1 of
-Dparse available at PyPi. Alternatively, you can run Safety from a Python 3
-environment to check the requirements file for your Python 2.7 project.
+This tool supports Python 3.6 and up. Older version support older Python versions

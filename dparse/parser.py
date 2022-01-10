@@ -1,22 +1,28 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-from collections import OrderedDict
-import re
-import yaml
 
+# SPDX-License-Identifier: MIT
+# Copyright (c)  Jannis Gebauer and others
+# Originally from https://github.com/pyupio/dparse/
+# Now maintained at https://github.com/nexB/dparse2
+
+import re
+import json
+from collections import OrderedDict
+from configparser import ConfigParser
+from configparser import NoOptionError
 from io import StringIO
 
-from configparser import ConfigParser, NoOptionError
+from packaging.requirements import Requirement as PackagingRequirement
+from packaging.requirements InvalidRequirement
+from packaging.specifiers import SpecifierSet
+import toml
+import yaml
+
 
 
 from .regex import URL_REGEX, HASH_REGEX
-
 from .dependencies import DependencyFile, Dependency
-from packaging.requirements import Requirement as PackagingRequirement, InvalidRequirement
 from . import filetypes
-import toml
-from packaging.specifiers import SpecifierSet
-import json
 
 
 # this is a backport from setuptools 26.1

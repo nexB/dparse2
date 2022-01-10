@@ -3,10 +3,14 @@ History
 =======
 
 
-0.5.2a (master)
----------------
+0.6.0 
+-------
 
-* Current unstable version
+* Fork from upstream dparse that is unresponsive
+* Rename to package dparse2
+* Fix security issue for GHSL-2021-111https://github.com/pyupio/dparse/issues/50
+* Drop support for Python < 3.6 and add support for up to 3.10
+
 
 0.5.1 (2020-04-26)
 ------------------
