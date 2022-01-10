@@ -4,29 +4,15 @@ from collections import OrderedDict
 import re
 import yaml
 
-# Python 2 & 3 compatible StringIO
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
-# Python 2 & 3 compatible Configparser
-try:
-    from ConfigParser import SafeConfigParser, NoOptionError
-except ImportError:
-    from configparser import SafeConfigParser, NoOptionError
+from configparser import ConfigParser, NoOptionError
 
-# Python 2 & 3 compatible basestring
-try:  # pragma: no cover
-    basestring
-except NameError:  # pragma: no cover
-    basestring = str
 
 from .regex import URL_REGEX, HASH_REGEX
 
 from .dependencies import DependencyFile, Dependency
 from packaging.requirements import Requirement as PackagingRequirement, InvalidRequirement
-import six
 from . import filetypes
 import toml
 from packaging.specifiers import SpecifierSet
@@ -61,7 +47,7 @@ def setuptools_parse_requirements_backport(strs):  # pragma: no cover
     # create a steppable iterator, so we can handle \-continuations
     def yield_lines(strs):
         """Yield non-empty/non-comment lines of a string or sequence"""
-        if isinstance(strs, six.string_types):
+        if isinstance(strs, str):
             for s in strs.splitlines():
                 s = s.strip()
                 # skip blank lines/comments
@@ -288,7 +274,7 @@ class ToxINIParser(Parser):
 
         :return:
         """
-        parser = SafeConfigParser()
+        parser = ConfigParser()
         parser.readfp(StringIO(self.obj.content))
         for section in parser.sections():
             try:
@@ -345,7 +331,7 @@ class PipfileParser(Parser):
                     if package_type in data:
                         for name, specs in data[package_type].items():
                             # skip on VCS dependencies
-                            if not isinstance(specs, basestring):
+                            if not isinstance(specs, str):
                                 continue
                             if specs == '*':
                                 specs = ''
@@ -393,7 +379,7 @@ class PipfileLockParser(Parser):
 
 class SetupCfgParser(Parser):
     def parse(self):
-        parser = SafeConfigParser()
+        parser = ConfigParser()
         parser.readfp(StringIO(self.obj.content))
         for section in parser.values():
             if section.name == 'options':
