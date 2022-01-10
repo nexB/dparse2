@@ -8,17 +8,15 @@
 
 
 import pytest
+from dparse.dependencies import UnknownDependencyFileError
+from dparse import parse
+from dparse import parser
 
 from dparse.dependencies import Dependency, DependencyFile
-from dparse import filetypes, parse, parser, errors
 
 
 def test_dependency_serialize():
-    dep = Dependency(
-        name="foo",
-        specs=(),
-        line="foo==1.2.3"
-    )
+    dep = Dependency(name="foo", specs=(), line="foo==1.2.3")
 
     serialized = dep.serialize()
     assert dep.name == serialized["name"]
@@ -28,11 +26,8 @@ def test_dependency_serialize():
     dep.extras = "some-extras"
     dep.line_numbers = (0, 4)
     dep.index_server = "some-foo-server"
-    dep.hashes = {
-        "method": "sha256",
-        "hash": "the hash"
-    }
-    dep.dependency_type = filetypes.requirements_txt
+    dep.hashes = {"method": "sha256", "hash": "the hash"}
+    dep.dependency_type = "requirements.txt"
 
     serialized = dep.serialize()
     assert dep.extras == serialized["extras"]
@@ -42,11 +37,7 @@ def test_dependency_serialize():
 
 
 def test_dependency_deserialize():
-    d = {
-        "name": "foo",
-        "specs": [],
-        "line": "foo==1.2.3"
-    }
+    d = {"name": "foo", "specs": [], "line": "foo==1.2.3"}
 
     dep = Dependency.deserialize(d)
 
@@ -57,11 +48,8 @@ def test_dependency_deserialize():
     d["extras"] = "some-extras"
     d["line_numbers"] = (0, 4)
     d["index_server"] = "some-foo-server"
-    d["hashes"] = {
-        "method": "sha256",
-        "hash": "the hash"
-    }
-    d["dependency_type"] = filetypes.requirements_txt
+    d["hashes"] = {"method": "sha256", "hash": "the hash"}
+    d["dependency_type"] = "requirements.txt"
 
     dep = Dependency.deserialize(d)
 
@@ -76,9 +64,9 @@ def test_dependency_file_serialize():
     content = "django==1.2\nrequests==1.2.3"
     dep_file = parse(
         content=content,
-        file_type=filetypes.requirements_txt,
+        file_type="requirements.txt",
         path="req.txt",
-        sha="sha"
+        sha="sha",
     )
 
     serialized = dep_file.serialize()
@@ -93,45 +81,47 @@ def test_dependency_file_serialize():
 
 def test_dependency_file_deserialize():
     d = {
-        'file_type': 'requirements.txt',
-        'content': 'django==1.2\nrequests==1.2.3',
-        'sha': 'sha',
-        'dependencies': [
+        "file_type": "requirements.txt",
+        "content": "django==1.2\nrequests==1.2.3",
+        "sha": "sha",
+        "dependencies": [
             {
-                'hashes': [],
-                'line_numbers': None,
-                'extras': (),
-                'name': 'django',
-                'index_server': None,
-                'dependency_type': 'requirements.txt',
-                'line': 'django==1.2',
-                'specs': [('==', '1.2')]
-             },
+                "hashes": [],
+                "line_numbers": None,
+                "extras": (),
+                "name": "django",
+                "index_server": None,
+                "dependency_type": "requirements.txt",
+                "line": "django==1.2",
+                "specs": [("==", "1.2")],
+            },
             {
-                'hashes': [],
-                'line_numbers': None,
-                'extras': (), 'name':
-                'requests',
-                'index_server': None,
-                'dependency_type': 'requirements.txt',
-                'line': 'requests==1.2.3',
-                'specs': [('==', '1.2.3')]}],
-        'path': 'req.txt'
+                "hashes": [],
+                "line_numbers": None,
+                "extras": (),
+                "name": "requests",
+                "index_server": None,
+                "dependency_type": "requirements.txt",
+                "line": "requests==1.2.3",
+                "specs": [("==", "1.2.3")],
+            },
+        ],
+        "path": "req.txt",
     }
 
     dep_file = DependencyFile.deserialize(d)
 
-    assert d['file_type'] == dep_file.file_type
-    assert d['content'] == dep_file.content
-    assert d['sha'] == dep_file.sha
-    assert d['path'] == dep_file.path
+    assert d["file_type"] == dep_file.file_type
+    assert d["content"] == dep_file.content
+    assert d["sha"] == dep_file.sha
+    assert d["path"] == dep_file.path
     assert "django" == dep_file.dependencies[0].name
     assert "requests" == dep_file.dependencies[1].name
 
 
 def test_parser_class():
 
-    dep_file = parse("", file_type=filetypes.requirements_txt)
+    dep_file = parse("", file_type="requirements.txt")
     assert isinstance(dep_file.parser, parser.RequirementsTXTParser)
 
     dep_file = parse("", path="req.txt")
@@ -140,13 +130,13 @@ def test_parser_class():
     dep_file = parse("", path="req.in")
     assert isinstance(dep_file.parser, parser.RequirementsTXTParser)
 
-    dep_file = parse("", file_type=filetypes.tox_ini)
+    dep_file = parse("", file_type="tox.ini")
     assert isinstance(dep_file.parser, parser.ToxINIParser)
 
     dep_file = parse("", path="tox.ini")
     assert isinstance(dep_file.parser, parser.ToxINIParser)
 
-    dep_file = parse("", file_type=filetypes.conda_yml)
+    dep_file = parse("", file_type="conda.yml")
     assert isinstance(dep_file.parser, parser.CondaYMLParser)
 
     dep_file = parse("", path="conda.yml")
@@ -155,5 +145,5 @@ def test_parser_class():
     dep_file = parse("", parser=parser.CondaYMLParser)
     assert isinstance(dep_file.parser, parser.CondaYMLParser)
 
-    with pytest.raises(errors.UnknownDependencyFileError) as e:
+    with pytest.raises(UnknownDependencyFileError):
         parse("")

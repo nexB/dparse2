@@ -10,6 +10,8 @@ History
 * Rename to package dparse2
 * Fix security issue for GHSL-2021-111https://github.com/pyupio/dparse/issues/50
 * Drop support for Python < 3.6 and add support for up to 3.10
+* Drop support for updating requirements files
+* format code with black, sort imports
 
 
 0.5.1 (2020-04-26)

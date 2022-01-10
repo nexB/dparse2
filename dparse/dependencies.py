@@ -5,30 +5,29 @@
 # Originally from https://github.com/pyupio/dparse/
 # Now maintained at https://github.com/nexB/dparse2
 
-
 import json
 
-from . import filetypes, errors
+
+class UnknownDependencyFileError(Exception):
+    pass
 
 
 class Dependency(object):
-    """
 
-    """
-
-    def __init__(self, name, specs, line, source="pypi", meta={}, extras=[], line_numbers=None, index_server=None, hashes=(), dependency_type=None, section=None):
-        """
-
-        :param name:
-        :param specs:
-        :param line:
-        :param source:
-        :param extras:
-        :param line_numbers:
-        :param index_server:
-        :param hashes:
-        :param dependency_type:
-        """
+    def __init__(
+        self,
+        name,
+        specs,
+        line,
+        source="pypi",
+        meta={},
+        extras=[],
+        line_numbers=None,
+        index_server=None,
+        hashes=(),
+        dependency_type=None,
+        section=None,
+    ):
         self.name = name
         self.key = name.lower().replace("_", "-")
         self.specs = specs
@@ -43,21 +42,11 @@ class Dependency(object):
         self.section = section
 
     def __str__(self):  # pragma: no cover
-        """
-
-        :return:
-        """
         return "Dependency({name}, {specs}, {line})".format(
-            name=self.name,
-            specs=self.specs,
-            line=self.line
+            name=self.name, specs=self.specs, line=self.line
         )
 
     def serialize(self):
-        """
-
-        :return:
-        """
         return {
             "name": self.name,
             "specs": self.specs,
@@ -69,44 +58,31 @@ class Dependency(object):
             "hashes": self.hashes,
             "dependency_type": self.dependency_type,
             "extras": self.extras,
-            "section": self.section
+            "section": self.section,
         }
 
     @classmethod
     def deserialize(cls, d):
-        """
-
-        :param d:
-        :return:
-        """
         return cls(**d)
 
     @property
     def full_name(self):
-        """
-
-        :return:
-        """
         if self.extras:
             return "{}[{}]".format(self.name, ",".join(self.extras))
         return self.name
 
 
 class DependencyFile(object):
-    """
 
-    """
-
-    def __init__(self, content, path=None, sha=None, file_type=None, marker=((), ()), parser=None):
-        """
-
-        :param content:
-        :param path:
-        :param sha:
-        :param marker:
-        :param file_type:
-        :param parser:
-        """
+    def __init__(
+        self,
+        content,
+        path=None,
+        sha=None,
+        file_type=None,
+        marker=((), ()),
+        parser=None,
+    ):
         self.content = content
         self.file_type = file_type
         self.path = path
@@ -118,84 +94,68 @@ class DependencyFile(object):
         self.is_valid = False
         self.file_marker, self.line_marker = marker
 
+        if not parser:
+            from dparse import parser as parser_class
+
+            parsers_by_filetype = {
+                "requirements.txt": parser_class.RequirementsTXTParser,
+                "requirements.in": parser_class.RequirementsTXTParser,
+                "tox.ini": parser_class.ToxINIParser,
+                "conda.yml": parser_class.CondaYMLParser,
+                "Pipfile": parser_class.PipfileParser,
+                "Pipfile.lock": parser_class.PipfileLockParser,
+                "setup.cfg": parser_class.SetupCfgParser,
+            }
+
+            parser = parsers_by_filetype.get(file_type)
+
+            parsers_by_file_end = {
+                (".txt", ".in"): parser_class.RequirementsTXTParser,
+                ".yml": parser_class.CondaYMLParser,
+                ".ini": parser_class.ToxINIParser,
+                "Pipfile": parser_class.PipfileParser,
+                "Pipfile.lock": parser_class.PipfileLockParser,
+                "setup.cfg": parser_class.SetupCfgParser,
+            }
+
+            if not parser and path:
+                for ends, prsr in parsers_by_file_end.items():
+                    if path.endswith(ends):
+                        parser = prsr
+                        break
         if parser:
             self.parser = parser
         else:
-            from . import parser as parser_class
-            if file_type is not None:
-                if file_type == filetypes.requirements_txt:
-                    self.parser = parser_class.RequirementsTXTParser
-                elif file_type == filetypes.tox_ini:
-                    self.parser = parser_class.ToxINIParser
-                elif file_type == filetypes.conda_yml:
-                    self.parser = parser_class.CondaYMLParser
-                elif file_type == filetypes.pipfile:
-                    self.parser = parser_class.PipfileParser
-                elif file_type == filetypes.pipfile_lock:
-                    self.parser = parser_class.PipfileLockParser
-                elif file_type == filetypes.setup_cfg:
-                    self.parser = parser_class.SetupCfgParser
-
-            elif path is not None:
-                if path.endswith((".txt", ".in")):
-                    self.parser = parser_class.RequirementsTXTParser
-                elif path.endswith(".yml"):
-                    self.parser = parser_class.CondaYMLParser
-                elif path.endswith(".ini"):
-                    self.parser = parser_class.ToxINIParser
-                elif path.endswith("Pipfile"):
-                    self.parser = parser_class.PipfileParser
-                elif path.endswith("Pipfile.lock"):
-                    self.parser = parser_class.PipfileLockParser
-                elif path.endswith("setup.cfg"):
-                    self.parser = parser_class.SetupCfgParser
-
-        if not hasattr(self, "parser"):
-            raise errors.UnknownDependencyFileError
+            raise UnknownDependencyFileError
 
         self.parser = self.parser(self)
 
     def serialize(self):
-        """
-
-        :return:
-        """
         return {
             "file_type": self.file_type,
             "content": self.content,
             "path": self.path,
             "sha": self.sha,
-            "dependencies": [dep.serialize() for dep in self.dependencies]
+            "dependencies": [dep.serialize() for dep in self.dependencies],
         }
 
     @classmethod
     def deserialize(cls, d):
-        """
-
-        :param d:
-        :return:
-        """
-        dependencies = [Dependency.deserialize(dep) for dep in d.pop("dependencies", [])]
+        dependencies = [
+            Dependency.deserialize(dep) for dep in d.pop("dependencies", [])
+        ]
         instance = cls(**d)
         instance.dependencies = dependencies
         return instance
 
     def json(self):  # pragma: no cover
-        """
-
-        :return:
-        """
         return json.dumps(self.serialize(), indent=2)
 
     def parse(self):
-        """
-
-        :return:
-        """
         if self.parser.is_marked_file:
             self.is_valid = False
             return self
-        self.parser.parse()
 
-        self.is_valid = len(self.dependencies) > 0 or len(self.resolved_files) > 0
+        self.parser.parse()
+        self.is_valid = self.dependencies or self.resolved_files
         return self
