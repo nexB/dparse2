@@ -76,29 +76,28 @@ def setuptools_parse_requirements_backport(strs):  # pragma: no cover
         yield PackagingRequirement(line)
 
 
-class RequirementsTXTLineParser(object):
+def parse_requirement_line(line):
+    try:
+        # setuptools requires a space before the comment. If this isn't the
+        # case, add it.
+        if "\t#" in line:
+            (parsed,) = setuptools_parse_requirements_backport(
+                line.replace("\t#", "\t #")
+            )
+        else:
+            (parsed,) = setuptools_parse_requirements_backport(line)
 
-    @classmethod
-    def parse(cls, line):
-        try:
-            # setuptools requires a space before the comment. If this isn't the
-            # case, add it.
-            if "\t#" in line:
-                (parsed,) = setuptools_parse_requirements_backport(
-                    line.replace("\t#", "\t #")
-                )
-            else:
-                (parsed,) = setuptools_parse_requirements_backport(line)
-        except InvalidRequirement:
-            return None
-        dep = Dependency(
-            name=parsed.name,
-            specs=parsed.specifier,
-            line=line,
-            extras=parsed.extras,
-            dependency_type="requirements.txt",
-        )
-        return dep
+    except InvalidRequirement:
+        return
+
+    dep = Dependency(
+        name=parsed.name,
+        specs=parsed.specifier,
+        line=line,
+        extras=parsed.extras,
+        dependency_type="requirements.txt",
+    )
+    return dep
 
 
 class Parser(object):
@@ -107,147 +106,11 @@ class Parser(object):
         self.obj = obj
         self._lines = None
 
-    def iter_lines(self, lineno=0):
-        for line in self.lines[lineno:]:
-            yield line
-
     @property
     def lines(self):
         if self._lines is None:
             self._lines = self.obj.content.splitlines()
         return self._lines
-
-    @property
-    def is_marked_file(self):
-        for n, line in enumerate(self.iter_lines()):
-            for marker in self.obj.file_marker:
-                if marker in line:
-                    return True
-            if n >= 2:
-                break
-        return False
-
-    def is_marked_line(self, line):
-        for marker in self.obj.line_marker:
-            if marker in line:
-                return True
-        return False
-
-    @classmethod
-    def parse_hashes(cls, line):
-        HASH_REGEX = r"--hash[=| ][\w]+:[\w]+"
-        hashes = []
-        for match in re.finditer(HASH_REGEX, line):
-            hashes.append(line[match.start() : match.end()])
-        return re.sub(HASH_REGEX, "", line).strip(), hashes
-
-    @classmethod
-    def parse_index_server(cls, line):
-        """
-        Return an inder server URL given a text ``line`` or None
-        """
-        # this file is using a private index server, try to parse it
-        if "=" in line:
-            splitter = "="
-        elif " " in line:
-            splitter = " "
-        else:
-            return
-
-        _option, _, index_server = line.partition(splitter)
-
-        if " #" in index_server:
-            index_server, _, _ = index_server.rpartition("#")
-            index_server = index_server.strip()
-
-        index_server = index_server.rstrip("/") + "/"
-        return index_server
-
-    @classmethod
-    def resolve_file(cls, file_path, line):
-        line = line.replace("--requirement ", "").replace("-r ", "")
-        if " #" in line:
-            line = line.split("#")[0].strip()
-
-        if "/" not in file_path:
-            return line
-
-        parts = file_path.split("/")
-        return "/".join(parts[:-1]) + "/" + line
-
-
-class RequirementsTXTParser(Parser):
-
-    def parse(self):
-        """
-        Parses a requirements.txt-like file
-        """
-        index_server = None
-        for num, line in enumerate(self.iter_lines()):
-            line = " ".join(line.split())
-            if not line:
-                continue
-
-            if line.startswith("#"):
-                # comments are lines that start with # only
-                continue
-
-            if line.startswith(("-i", "--index-url", "--extra-index-url")):
-                # this file is using a private index server, try to parse it
-                index_server = Parser.parse_index_server(line)
-                continue
-
-            elif self.obj.path and (
-                line.startswith("-r") or line.startswith("--requirement")
-            ):
-                self.obj.resolved_files.append(self.resolve_file(self.obj.path, line))
-            elif line.startswith(
-                (
-                    "-f",
-                    "--find-links",
-                    "--no-index",
-                    "--allow-external",
-                    "--allow-unverified",
-                    "-Z",
-                    "--always-unzip",
-                )
-            ):
-                continue
-
-            elif self.is_marked_line(line):
-                continue
-
-            else:
-                try:
-
-                    parseable_line = line
-
-                    # multiline requirements are not parseable
-                    if "\\" in line:
-                        parseable_line = line.replace("\\", "")
-                        for next_line in self.iter_lines(num + 1):
-                            parseable_line += next_line.strip().replace("\\", "")
-                            line += "\n" + next_line
-                            if "\\" in next_line:
-                                continue
-                            break
-                        # ignore multiline requirements if they are marked
-                        if self.is_marked_line(parseable_line):
-                            continue
-
-                    hashes = []
-                    if "--hash" in parseable_line:
-                        parseable_line, hashes = Parser.parse_hashes(parseable_line)
-
-                    req = RequirementsTXTLineParser.parse(parseable_line)
-                    if req:
-                        req.hashes = hashes
-                        req.index_server = index_server
-                        # replace the requirements line with the 'real' line
-                        req.line = line
-                        self.obj.dependencies.append(req)
-                except ValueError:
-                    continue
 
 
 class ToxINIParser(Parser):
@@ -259,13 +122,11 @@ class ToxINIParser(Parser):
             try:
                 content = parser.get(section=section, option="deps")
                 for line in content.splitlines():
-                    if self.is_marked_line(line):
-                        continue
                     if not line:
                         continue
-                    req = RequirementsTXTLineParser.parse(line)
+                    req = parse_requirement_line(line)
                     if req:
-                        req.dependency_type = self.obj.file_type
+                        req.dependency_type = self.obj.file_name
                         self.obj.dependencies.append(req)
 
             except NoOptionError:
@@ -283,11 +144,9 @@ class CondaYMLParser(Parser):
                     continue
                 lines = dep.get("pip") or []
                 for line in lines:
-                    if self.is_marked_line(line):
-                        continue
-                    req = RequirementsTXTLineParser.parse(line)
+                    req = parse_requirement_line(line)
                     if req:
-                        req.dependency_type = self.obj.file_type
+                        req.dependency_type = self.obj.file_name
                         self.obj.dependencies.append(req)
         except yaml.YAMLError:
             pass
@@ -379,23 +238,19 @@ class SetupCfgParser(Parser):
 
     def _parse_content(self, content):
         for line in content.splitlines():
-            if self.is_marked_line(line):
-                continue
             if not line:
                 continue
-            req = RequirementsTXTLineParser.parse(line)
+            req = parse_requirement_line(line)
             if req:
-                req.dependency_type = self.obj.file_type
+                req.dependency_type = self.obj.file_name
                 self.obj.dependencies.append(req)
 
 
-def parse(content, file_type=None, path=None, sha=None, marker=((), ()), parser=None):
+def parse(content, file_name=None, path=None, parser=None):
     dep_file = DependencyFile(
         content=content,
         path=path,
-        sha=sha,
-        marker=marker,
-        file_type=file_type,
+        file_name=file_name,
         parser=parser,
     )
 

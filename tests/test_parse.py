@@ -9,14 +9,6 @@
 from packaging.specifiers import SpecifierSet
 
 from dparse.parser import parse
-from dparse.parser import Parser
-
-
-def test_requirements_with_invalid_requirement():
-
-    content = "in=vali===d{}{}{"
-    dep_file = parse(content, file_type="requirements.txt")
-    assert len(dep_file.dependencies) == 0
 
 
 def test_tox_ini_with_invalid_requirement():
@@ -31,7 +23,7 @@ def test_tox_ini_with_invalid_requirement():
         "pytest-cov"
         "codecov"
     )
-    dep_file = parse(content, file_type="tox.ini")
+    dep_file = parse(content, file_name="tox.ini")
     assert len(dep_file.dependencies) == 0
 
 
@@ -44,14 +36,14 @@ def test_conda_file_with_invalid_requirement():
         "  - pip:\n"
         "    - in=vali===d{}{}{"
     )
-    dep_file = parse(content, file_type="conda.yml")
+    dep_file = parse(content, file_name="conda.yml")
     assert len(dep_file.dependencies) == 0
 
 
 def test_conda_file_invalid_yml():
 
     content = "wawth:dda : awd:\ndlll"
-    dep_file = parse(content, file_type="conda.yml")
+    dep_file = parse(content, file_name="conda.yml")
     assert dep_file.dependencies == []
 
 
@@ -63,11 +55,8 @@ def test_conda_file_marked_line():
         "  - pip:\n"
         "    - beautifulsoup4==1.2.3\n # naaah, marked"
     )
-    dep_file = parse(content, file_type="conda.yml")
+    dep_file = parse(content, file_name="conda.yml")
     assert len(dep_file.dependencies) == 1
-
-    dep_file = parse(content, file_type="conda.yml", marker=((), "naah, marked"))
-    assert len(dep_file.dependencies) == 0
 
 
 def test_tox_ini_marked_line():
@@ -85,134 +74,6 @@ def test_tox_ini_marked_line():
 
     dep_file = parse(content, "tox.ini")
     assert len(dep_file.dependencies) == 1
-
-    dep_file = parse(content, "tox.ini", marker=((), "naah, marked"))
-    assert len(dep_file.dependencies) == 0
-
-
-def test_resolve_file():
-    line = "-r req.txt"
-    assert Parser.resolve_file("/", line) == "/req.txt"
-
-    line = "-r req.txt # mysterious comment"
-    assert Parser.resolve_file("/", line) == "/req.txt"
-
-    line = "-r req.txt"
-    assert Parser.resolve_file("", line) == "req.txt"
-
-
-def test_index_server():
-    line = "--index-url https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "-i https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url https://some.foo"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url https://some.foo # some lousy comment"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "-i\t\t https://some.foo \t\t    # some lousy comment"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--index-url"
-    assert Parser.parse_index_server(line) is None
-
-    line = "--index-url=https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "-i=https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url=https://some.foo/"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url=https://some.foo"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "--extra-index-url=https://some.foo # some lousy comment"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-    line = "-i\t\t =https://some.foo \t\t    # some lousy comment"
-    assert Parser.parse_index_server(line) == "https://some.foo/"
-
-
-def test_requirements_package_with_index_server():
-    content = """-i https://some.foo/\ndjango"""
-
-    dep_file = parse(content=content, file_type="requirements.txt")
-    dep = dep_file.dependencies[0]
-
-    assert dep.name == "django"
-    assert dep.index_server == "https://some.foo/"
-
-
-def test_requirements_parse_empty_line():
-    content = """
-    """
-
-    dep_file = parse(content=content, file_type="requirements.txt")
-    assert dep_file.dependencies == []
-    assert dep_file.resolved_files == []
-
-
-def test_requirements_parse_unsupported_line_start():
-    content = (
-        "-f foo\n"
-        "--find-links bla\n"
-        "-i bla\n"
-        "--index-url bla\n"
-        "--extra-index-url bla\n"
-        "--no-index bla\n"
-        "--allow-external\n"
-        "--allow-unverified\n"
-        "-Z\n"
-        "--always-unzip\n"
-    )
-
-    dep_file = parse(content=content, file_type="requirements.txt")
-    assert dep_file.dependencies == []
-    assert dep_file.resolved_files == []
-
-
-def test_file_resolver():
-    content = "-r production/requirements.txt\n" "--requirement test.txt\n"
-
-    dep_file = parse(content=content, path="/", file_type="requirements.txt")
-
-    assert dep_file.resolved_files == [
-        "/production/requirements.txt",
-        "/test.txt",
-    ]
-
-    dep_file = parse(content=content, file_type="requirements.txt")
-
-    assert dep_file.resolved_files == []
-
-
-def test_is_marked_file():
-
-    content = "# DON'T\nfoo"
-    dep_file = parse(content, file_type="requirements.txt")
-    assert not dep_file.parser.is_marked_file
-
-    dep_file = parse(content, file_type="requirements.txt", marker=(("DON'T",), ()))
-    assert dep_file.parser.is_marked_file
-
-
-def test_is_marked_line():
-
-    content = "foo # don't"
-    dep_file = parse(content, file_type="requirements.txt")
-    assert not dep_file.parser.is_marked_line(next(dep_file.parser.iter_lines()))
-
-    dep_file = parse(content, file_type="requirements.txt", marker=((), ("don't",)))
-    assert dep_file.parser.is_marked_line(next(dep_file.parser.iter_lines()))
 
 
 def test_pipfile():
@@ -234,7 +95,7 @@ django-allauth = "*"
 
 toml = "*"
 """
-    dep_file = parse(content, file_type="Pipfile")
+    dep_file = parse(content, file_name="Pipfile")
     assert len(dep_file.dependencies) == 4
     assert dep_file.dependencies[0].name == "django"
     assert dep_file.dependencies[0].specs == SpecifierSet("==2.0")
@@ -296,7 +157,7 @@ def test_pipfile_lock():
     },
     "develop": {}
 }"""
-    dep_file = parse(content, file_type="Pipfile.lock")
+    dep_file = parse(content, file_name="Pipfile.lock")
     assert dep_file.dependencies[0].name == "django"
     assert dep_file.dependencies[0].specs == SpecifierSet("==2.0.1")
     assert dep_file.dependencies[0].hashes == [
@@ -312,16 +173,16 @@ url = "http://some.pypi.mirror.server.org/simple"
 verify_ssl = false
 ds name < "pypi"
 """
-    dep_file = parse(content, file_type="Pipfile")
+    dep_file = parse(content, file_name="Pipfile")
     assert not dep_file.dependencies
 
 
 def test_pipfile_lock_with_invalid_json():
     content = """{
-    "_meta": 
+    "_meta":
         "hash": {
             "sha256": "8b5635a4f7b069ae6661115b9eaa15466f7cd96794af5d131735a3638be101fb"
         },
 }"""
-    dep_file = parse(content, file_type="Pipfile.lock")
+    dep_file = parse(content, file_name="Pipfile.lock")
     assert not dep_file.dependencies

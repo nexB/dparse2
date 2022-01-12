@@ -12,7 +12,7 @@ class UnknownDependencyFileError(Exception):
     pass
 
 
-class Dependency(object):
+class Dependency:
 
     def __init__(
         self,
@@ -22,8 +22,6 @@ class Dependency(object):
         source="pypi",
         meta={},
         extras=[],
-        line_numbers=None,
-        index_server=None,
         hashes=(),
         dependency_type=None,
         section=None,
@@ -34,8 +32,6 @@ class Dependency(object):
         self.line = line
         self.source = source
         self.meta = meta
-        self.line_numbers = line_numbers
-        self.index_server = index_server
         self.hashes = hashes
         self.dependency_type = dependency_type
         self.extras = extras
@@ -53,8 +49,6 @@ class Dependency(object):
             "line": self.line,
             "source": self.source,
             "meta": self.meta,
-            "line_numbers": self.line_numbers,
-            "index_server": self.index_server,
             "hashes": self.hashes,
             "dependency_type": self.dependency_type,
             "extras": self.extras,
@@ -72,34 +66,27 @@ class Dependency(object):
         return self.name
 
 
-class DependencyFile(object):
+class DependencyFile:
 
     def __init__(
         self,
         content,
         path=None,
-        sha=None,
-        file_type=None,
-        marker=((), ()),
+        file_name=None,
         parser=None,
     ):
         self.content = content
-        self.file_type = file_type
+        self.file_name = file_name
         self.path = path
-        self.sha = sha
-        self.marker = marker
 
         self.dependencies = []
         self.resolved_files = []
         self.is_valid = False
-        self.file_marker, self.line_marker = marker
 
         if not parser:
             from dparse import parser as parser_class
 
-            parsers_by_filetype = {
-                "requirements.txt": parser_class.RequirementsTXTParser,
-                "requirements.in": parser_class.RequirementsTXTParser,
+            parsers_by_file_name = {
                 "tox.ini": parser_class.ToxINIParser,
                 "conda.yml": parser_class.CondaYMLParser,
                 "Pipfile": parser_class.PipfileParser,
@@ -107,10 +94,9 @@ class DependencyFile(object):
                 "setup.cfg": parser_class.SetupCfgParser,
             }
 
-            parser = parsers_by_filetype.get(file_type)
+            parser = parsers_by_file_name.get(file_name)
 
             parsers_by_file_end = {
-                (".txt", ".in"): parser_class.RequirementsTXTParser,
                 ".yml": parser_class.CondaYMLParser,
                 ".ini": parser_class.ToxINIParser,
                 "Pipfile": parser_class.PipfileParser,
@@ -132,10 +118,8 @@ class DependencyFile(object):
 
     def serialize(self):
         return {
-            "file_type": self.file_type,
             "content": self.content,
             "path": self.path,
-            "sha": self.sha,
             "dependencies": [dep.serialize() for dep in self.dependencies],
         }
 
@@ -152,10 +136,6 @@ class DependencyFile(object):
         return json.dumps(self.serialize(), indent=2)
 
     def parse(self):
-        if self.parser.is_marked_file:
-            self.is_valid = False
-            return self
-
         self.parser.parse()
         self.is_valid = self.dependencies or self.resolved_files
         return self
