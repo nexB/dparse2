@@ -8,11 +8,13 @@
 
 
 import pytest
-from dparse.dependencies import UnknownDependencyFileError
-from dparse import parse
-from dparse import parser
 
-from dparse.dependencies import Dependency, DependencyFile
+from dparse2 import parse
+from dparse2 import parser
+from dparse2.dependencies import Dependency
+from dparse2.dependencies import DependencyFile
+from dparse2.dependencies import UnknownDependencyFileError
+
 
 
 def test_dependency_serialize():

@@ -8,4 +8,4 @@
 # __email__ = 'support@pyup.io'
 # __version__ = '0.5.2a'
 
-from dparse.parser import parse  # noqa
+from dparse2.parser import parse  # noqa

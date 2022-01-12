@@ -19,7 +19,7 @@ from packaging.requirements import InvalidRequirement
 from packaging.requirements import Requirement as PackagingRequirement
 from packaging.specifiers import SpecifierSet
 
-from dparse.dependencies import Dependency, DependencyFile
+from dparse2.dependencies import Dependency, DependencyFile
 
 
 # this is a backport from setuptools 26.1

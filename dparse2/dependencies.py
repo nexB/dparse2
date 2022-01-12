@@ -84,7 +84,7 @@ class DependencyFile:
         self.is_valid = False
 
         if not parser:
-            from dparse import parser as parser_class
+            from dparse2 import parser as parser_class
 
             parsers_by_file_name = {
                 "tox.ini": parser_class.ToxINIParser,

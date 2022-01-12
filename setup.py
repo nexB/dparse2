@@ -20,7 +20,7 @@ setup(
     author="originally from Jannis Gebauer, maintained by AboutCode.org",
     author_email="info@nexb.com",
     url="https://github.com/nexB/dparse2",
-    packages=find_packages(include=["dparse"]),
+    packages=find_packages(include=["dparse2"]),
     include_package_data=True,
     install_requires=[
         "packaging",
@@ -29,9 +29,9 @@ setup(
     ],
     license="MIT",
     zip_safe=False,
-    keywords="dparse pypi dependencies setup.py pipfile requirements",
+    keywords="dparse pypi dependencies tox conda pipfile setup.cfg",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",

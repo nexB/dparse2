@@ -8,7 +8,7 @@
 
 from packaging.specifiers import SpecifierSet
 
-from dparse.parser import parse
+from dparse2.parser import parse
 
 
 def test_tox_ini_with_invalid_requirement():

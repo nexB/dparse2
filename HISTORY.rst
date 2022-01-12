@@ -7,7 +7,7 @@ History
 -------
 
 * Fork from upstream dparse that is unresponsive
-* Rename to package dparse2
+* Rename package to dparse2
 * Fix security issue for GHSL-2021-111https://github.com/pyupio/dparse/issues/50
 * Drop support for Python < 3.6 and add support for up to 3.10
 * Drop support for updating requirements files
