@@ -11,12 +11,12 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-
 setup(
     name="dparse2",
     version="0.6.1",
     description="A parser for Python dependency files",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
     author="originally from Jannis Gebauer, maintained by AboutCode.org",
     author_email="info@nexb.com",
     url="https://github.com/nexB/dparse2",
