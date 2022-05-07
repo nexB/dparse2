@@ -6,7 +6,6 @@
 # Now maintained at https://github.com/nexB/dparse2
 
 import json
-import re
 from collections import OrderedDict
 from configparser import ConfigParser
 from configparser import NoOptionError
@@ -223,7 +222,7 @@ class SetupCfgParser(Parser):
 
     def parse(self):
         parser = ConfigParser()
-        parser.readfp(StringIO(self.obj.content))
+        parser.read_file(StringIO(self.obj.content))
         for section in parser.values():
             if section.name == "options":
                 options = "install_requires", "setup_requires", "test_require"
