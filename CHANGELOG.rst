@@ -6,7 +6,6 @@ Changelog
 -------
 
 * Use non-deprecated ConfiParser method
-* 
 
 
 0.6.0 
