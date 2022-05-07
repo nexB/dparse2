@@ -1,6 +1,12 @@
 =======
-History
+Changelog
 =======
+
+0.6.1 
+-------
+
+* Use non-deprecated ConfiParser method
+* 
 
 
 0.6.0 
