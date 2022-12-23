@@ -67,3 +67,4 @@ target/
 sandbox.py
 /tmp/
 /venv/
+/.pytest_cache/

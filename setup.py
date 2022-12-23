@@ -13,7 +13,7 @@ with open("CHANGELOG.rst") as history_file:
 
 setup(
     name="dparse2",
-    version="0.6.1",
+    version="0.7.0",
     description="A parser for Python dependency files",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
@@ -23,7 +23,7 @@ setup(
     packages=find_packages(include=["dparse2"]),
     include_package_data=True,
     install_requires=[
-        "packaging",
+        "packvers",
         "pyyaml",
         "toml",
     ],
@@ -41,6 +41,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     python_requires=">=3.6",
     extras_require={

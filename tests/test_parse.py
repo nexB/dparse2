@@ -6,7 +6,7 @@
 # Originally from https://github.com/pyupio/dparse/
 # Now maintained at https://github.com/nexB/dparse2
 
-from packaging.specifiers import SpecifierSet
+from packvers.specifiers import SpecifierSet
 
 from dparse2.parser import parse
 

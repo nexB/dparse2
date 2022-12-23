@@ -2,10 +2,17 @@
 Changelog
 ==========
 
+0.7.0
+-------
+
+* Use packvers instead of packaging
+
+
+
 0.6.1 
 -------
 
-* Use non-deprecated ConfiParser method
+* Use non-deprecated ConfigParser method
 
 
 0.6.0 
