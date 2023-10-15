@@ -25,7 +25,7 @@ setup(
     install_requires=[
         "packvers",
         "pyyaml",
-        "toml",
+        "tomli",
     ],
     license="MIT",
     zip_safe=False,

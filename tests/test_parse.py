@@ -93,7 +93,7 @@ django-allauth = "*"
 
 [dev-packages]
 
-toml = "*"
+tomli = "*"
 """
     dep_file = parse(content, file_name="Pipfile")
     assert len(dep_file.dependencies) == 4

@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from configparser import NoOptionError
 from io import StringIO
 
-import toml
+import tomli
 import yaml
 
 from packvers.requirements import InvalidRequirement
@@ -158,7 +158,7 @@ class PipfileParser(Parser):
         Parse a Pipfile (as seen in pipenv)
         """
         try:
-            data = toml.loads(self.obj.content, _dict=OrderedDict)
+            data = tomli.loads(self.obj.content, _dict=OrderedDict)
             if not data:
                 return
             for package_type in ["packages", "dev-packages"]:
@@ -181,7 +181,7 @@ class PipfileParser(Parser):
                             section=package_type,
                         )
                     )
-        except (toml.TomlDecodeError, IndexError):
+        except (tomli.TomlDecodeError, IndexError):
             pass
 
 
