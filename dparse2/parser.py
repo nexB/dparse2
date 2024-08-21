@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c)  Jannis Gebauer and others
 # Originally from https://github.com/pyupio/dparse/
-# Now maintained at https://github.com/nexB/dparse2
+# Now maintained at https://github.com/aboutcode-org/dparse2
 
 import json
 from collections import OrderedDict
@@ -42,7 +42,6 @@ def setuptools_parse_requirements_backport(strs):  # pragma: no cover
     # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     # DEALINGS IN THE SOFTWARE.
-
     """
     Yield ``Requirement`` objects for each specification in `strs`
     `strs` must be a string, or a (possibly-nested) iterable thereof.

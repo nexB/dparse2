@@ -19,7 +19,7 @@ setup(
     long_description_content_type="text/x-rst",
     author="originally from Jannis Gebauer, maintained by AboutCode.org",
     author_email="info@nexb.com",
-    url="https://github.com/nexB/dparse2",
+    url="https://github.com/aboutcode-org/dparse2",
     packages=find_packages(include=["dparse2"]),
     include_package_data=True,
     install_requires=[

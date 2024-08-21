@@ -3,8 +3,8 @@ Dependency Parser
 =================
 
 
-A parser for Python manifests and dependency files now at 
-https://github.com/nexB/dparse2
+A parser for Python manifests and dependency files now at
+https://github.com/aboutcode-org/dparse2
 
 Originally at https://github.com/pyupio/dparse
 

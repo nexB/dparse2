@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c)  Jannis Gebauer and others
 # Originally from https://github.com/pyupio/dparse/
-# Now maintained at https://github.com/nexB/dparse2
+# Now maintained at https://github.com/aboutcode-org/dparse2
 
 
 import pytest
@@ -14,7 +14,6 @@ from dparse2 import parser
 from dparse2.dependencies import Dependency
 from dparse2.dependencies import DependencyFile
 from dparse2.dependencies import UnknownDependencyFileError
-
 
 
 def test_dependency_serialize():
@@ -53,6 +52,7 @@ def test_dependency_deserialize():
     assert d["extras"] == dep.extras
     assert d["hashes"] == dep.hashes
     assert d["dependency_type"] == dep.dependency_type
+
 
 def test_parser_class():
     dep_file = parse("", file_name="tox.ini")
